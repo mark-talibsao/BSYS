@@ -1,0 +1,49 @@
+{
+  "id": "C-2026-10-20-0009",
+  "created": "2026-10-20T14:18:36+00:00",
+  "domain": "btsup",
+  "request": {
+    "mark_involved": "assigned",
+    "asks_for": [
+      "credits"
+    ],
+    "app": "zoominfo",
+    "owning_team": "bt",
+    "requires_recipe_change": false,
+    "requires_deployment": false,
+    "reproducible": true,
+    "jira_key": "BTSUP-77631",
+    "note": "Marc Parilla asked whether Nooks ZoomInfo credits differ from the usual pool.",
+    "credit_request_type": "investigation"
+  },
+  "decision": {
+    "disposition": "ROUTE",
+    "owner": "marketing_ops",
+    "rules_fired": [
+      "BTS-030"
+    ],
+    "conflicts": [],
+    "escalate": [
+      "confidence 0.30 below 0.5 floor"
+    ],
+    "require": [],
+    "confidence": 0.3,
+    "novel": false,
+    "risk_tier": "R3",
+    "risk_rules_fired": [
+      "RSK-005"
+    ],
+    "autonomy": "draft_only",
+    "domain": "btsup",
+    "blocked": true
+  },
+  "verdict": {
+    "outcome": "edited",
+    "corrected": {
+      "owner": "bt_support_zoominfo_admin"
+    },
+    "why": "Straight request for additional ZoomInfo credits goes to Marketing Ops. A credit issue needing investigation is handled by BT Support with ZoomInfo admin access. The discriminator is request vs investigation, not procurement vs reissue.",
+    "at": "2026-10-20T14:18:36+00:00"
+  },
+  "supersedes": "C-2026-10-20-0001"
+}

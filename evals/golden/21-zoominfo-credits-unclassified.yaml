@@ -1,0 +1,16 @@
+# Same ask, kind not yet established. The system must name the one missing bit
+# rather than guess an owner or fall through as novel.
+domain: btsup
+ticket:
+  mark_involved: assigned
+  asks_for: [credits]
+  app: zoominfo
+  owning_team: bt
+  requires_recipe_change: false
+action: {kind: triage, system: zoominfo, environment: production, audience: internal, reversible: true, records_affected: 0}
+expect:
+  disposition: CLARIFY
+  must_fire: [BTS-035]
+  must_not_fire: [BTS-033, BTS-034]
+# Why golden: a guessed owner here is a week of latency. The whole decision
+# turns on one question, so ask it.

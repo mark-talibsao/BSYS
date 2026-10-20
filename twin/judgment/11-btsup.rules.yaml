@@ -222,10 +222,13 @@ rules:
     on: 2026-10-20
     by: correction
     reason: >
-      Overturned on C-2026-10-20-0001. Too broad: it read every enrichment
-      credit question as a budget question and routed it away. Credit
-      *procurement* is still Marketing Ops, but a credit *reissue* is manual
-      processing by the ZoomInfo admin. Replaced by BTS-033.
+      Overturned on C-2026-10-20-0001, then re-read on C-2026-10-20-0009.
+      The destination was right and the trigger was too broad: it sent every
+      enrichment credit question to Marketing Ops, including the ones that are
+      investigations rather than asks. Split into BTS-034 (a straight request
+      for additional credits — Marketing Ops, as this rule had it) and BTS-033
+      (a credit issue needing investigation — BT Support's ZoomInfo admin).
+      Kept retired because no single trigger covers both.
   provenance: { source: retro-mining, cases: [BTSUP-77631] }
   confidence: 0.5
   added: 2026-10-20
@@ -404,24 +407,67 @@ rules:
   added: 2026-10-20
 
 - id: BTS-033
-  title: ZoomInfo credits — comment internally, then the ZoomInfo admin
+  title: ZoomInfo credit issue needing investigation — BT Support ZoomInfo admin
   status: proposed
-  precedence: 72
+  precedence: 73
   when:
     all:
       - { field: ticket.asks_for, op: contains, value: credits }
       - { field: ticket.app, op: eq, value: zoominfo }
+      - { field: ticket.credit_request_type, op: eq, value: investigation }
   then:
     set: { disposition: ROUTE, owner: bt_support_zoominfo_admin }
     require: [internal_comment]
   because: >
-    "ZoomInfo credits, needs manual processing. Next time, add internal
-    comments then route it with BT support ZoomInfo admin user." Replaces
-    BTS-030, which routed this to Marketing Ops. Marketing Ops owns whether
-    credits are *bought*; the ZoomInfo admin is who actually reissues them.
-    The internal comment matters because the next person picking this up needs
-    to know it was triaged, not ignored.
-  provenance: { source: correction, cases: [C-2026-10-20-0001] }
+    "For issue that needs investigation, this can be handled by BT support that
+    has ZoomInfo admin access." Investigation needs the admin console, not a
+    budget decision — "are the Nooks credits a different pool from the usual
+    ones" is a question only someone inside ZoomInfo can answer. The internal
+    comment matters because the next person picking this up needs to know it
+    was triaged rather than ignored.
+  provenance: { source: correction, cases: [C-2026-10-20-0001, C-2026-10-20-0009] }
+  confidence: 0.5
+  added: 2026-10-20
+
+- id: BTS-034
+  title: Straight request for additional ZoomInfo credits — Marketing Ops
+  status: proposed
+  precedence: 73
+  when:
+    all:
+      - { field: ticket.asks_for, op: contains, value: credits }
+      - { field: ticket.app, op: eq, value: zoominfo }
+      - { field: ticket.credit_request_type, op: eq, value: additional }
+  then:
+    set: { disposition: ROUTE, owner: marketing_ops }
+  because: >
+    "For straight ZoomInfo Credit request (additional credits), this should go
+    to Marketing OPS team." They hold the pool and the budget, so granting more
+    from the systems side would spend money that is not ours. Consistent with
+    what Mark told #ask-bt directly: "For ZoomInfo credits please work with
+    Marketing Ops team. We don't have available ZI credits at the moment."
+  provenance: { source: correction, cases: [C-2026-10-20-0009] }
+  confidence: 0.5
+  added: 2026-10-20
+
+- id: BTS-035
+  title: ZoomInfo credit ticket of undetermined kind
+  status: proposed
+  precedence: 71
+  when:
+    all:
+      - { field: ticket.asks_for, op: contains, value: credits }
+      - { field: ticket.app, op: eq, value: zoominfo }
+      - { field: ticket.credit_request_type, op: missing }
+  then:
+    set: { disposition: CLARIFY }
+    require: [classify_credit_request]
+  because: >
+    The whole routing decision turns on one distinction, so the triager is told
+    exactly which bit to establish rather than being handed a novel decision at
+    0.1 confidence. Asking "is this a request for more credits, or a credit
+    behaving unexpectedly" takes a second and decides the owner.
+  provenance: { source: authored, cases: [] }
   confidence: 0.5
   added: 2026-10-20
 

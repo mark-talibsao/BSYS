@@ -31,6 +31,13 @@ fine in reasoning and forbidden in side effects (`RSK-006`).
 contributed to, and overturned when I changed a field it set. Both are counted
 per firing, in `_stats.json`, by `capture` only.
 
+**credit request vs credit investigation** — the distinction that decides who
+owns a ZoomInfo credit ticket. A *request* is an ask for additional credits: a
+budget decision, so Marketing Ops (`BTS-034`). An *investigation* is a credit
+behaving unexpectedly — exhausted early, a separate pool, numbers not adding up
+— which needs the admin console, so BT Support's ZoomInfo admin (`BTS-033`).
+Not procurement-vs-reissue, which was the first and wrong reading of this.
+
 **draft** — produced, shown, and not sent. Applies to Slack replies, Jira
 comments, emails and record writes alike. There is no tier at which a draft
 becomes an action implicitly; it takes a click.

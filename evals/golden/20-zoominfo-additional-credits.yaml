@@ -1,0 +1,17 @@
+# The other side of the split: a straight ask for more credits.
+domain: btsup
+ticket:
+  mark_involved: assigned
+  asks_for: [credits]
+  app: zoominfo
+  owning_team: bt
+  credit_request_type: additional
+  requires_recipe_change: false
+action: {kind: grant_credits, system: zoominfo, environment: production, audience: internal, reversible: true, records_affected: 0}
+expect:
+  disposition: ROUTE
+  owner: marketing_ops
+  must_fire: [BTS-034]
+  must_not_fire: [BTS-033, BTS-035]
+# Why golden: Marketing Ops holds the pool and the budget. Granting more from
+# the systems side spends money that is not ours.
