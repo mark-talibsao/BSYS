@@ -1,4 +1,9 @@
-# BTSUP-77148 — drafted reply (not posted)
+# BTSUP-77148 — reply (posted 2026-10-20)
+
+**Posted** as comment 1143794, jsdPublic. Status moved Biz Sys Review →
+Awaiting information via the "Need Customer info" transition. Approved
+explicitly by Mark; `jira_comment` is R1 in `20-risk.rules.yaml`, so the
+single-click gate held and nothing posted before he said so.
 
 Reporter: Gargi Purohit · Status: Biz Sys Review · 22 comments
 
