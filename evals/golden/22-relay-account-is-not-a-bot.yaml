@@ -1,0 +1,17 @@
+# BTSUP-77725 / 77579 shape: Mark delivered the work, and his comment arrived
+# through the relay account. Filtering the relay made it look like his queue.
+domain: btsup
+ticket:
+  mark_involved: assigned
+  asks_for: [connection_setup]
+  app: gong
+  owning_team: bt
+  last_comment_author: relay_account
+  status_closed: false
+action: {kind: triage, system: jira, environment: production, audience: internal, reversible: true, records_affected: 0}
+expect:
+  must_fire: [BTS-070]
+  escalates: true
+# Why golden: this is the defect that produced four wrong replies in one pass.
+# If BTS-070 stops firing, the relay trap is live again and the symptom is
+# silent — a confidently wrong read of who is waiting.

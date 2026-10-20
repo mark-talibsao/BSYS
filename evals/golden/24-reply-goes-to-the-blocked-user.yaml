@@ -1,0 +1,21 @@
+# BTSUP-76347 shape: a colleague answered Mark's internal question, but the
+# user who cannot work is still waiting.
+domain: btsup
+ticket:
+  mark_involved: assigned
+  asks_for: [permission_change]
+  app: salesforce
+  owning_team: bt
+  user_awaiting_response: true
+  last_comment_author_role: colleague
+  days_since_last_response: 13
+  followups_sent: 0
+  last_human_comment_is_resolution: false
+action: {kind: comment, system: jira, environment: production, audience: internal, reversible: true, records_affected: 0}
+expect:
+  disposition: RESPOND
+  must_fire: [BTS-073, BTS-053]
+# Why golden: BTS-053 says the user is owed an answer; BTS-073 says who that
+# user is. Together they stop a reply being addressed to the colleague who
+# happened to type last. If BTS-073 stops firing, replies drift back to the
+# wrong audience and the blocked person waits another month.

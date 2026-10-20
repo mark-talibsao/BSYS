@@ -1,0 +1,20 @@
+# Work delivered, shared with the requester, no reply. Two moves only: close or
+# follow up. Asking for scope again is not one of them.
+domain: btsup
+ticket:
+  mark_involved: assigned
+  asks_for: [connection_setup]
+  app: gong
+  owning_team: bt
+  last_touch: ours
+  status_closed: false
+  days_since_last_response: 14
+  followups_sent: 0
+  last_human_comment_is_resolution: false
+action: {kind: comment, system: jira, environment: production, audience: internal, reversible: true, records_affected: 0}
+expect:
+  disposition: FOLLOW_UP
+  must_fire: [BTS-072]
+# Why golden: `require` must keep carrying restate_what_was_delivered. A
+# follow-up that does not say what was already built reads as having lost the
+# thread, which is exactly the failure being corrected here.

@@ -25,19 +25,56 @@ actually a comment *by* or *addressed to* me before treating it as mine.
 
 ## 2. Who is waiting on whom
 
-The single most useful signal, and it is not in any field: **the last non-bot
-commenter.**
+The single most useful signal, and it is not in any field: **who actually spoke
+last, and what the last two messages say to each other.**
 
-- Last human comment is mine → waiting on the requester.
-- Last human comment is someone else's → waiting on me.
+### The relay trap — read this before writing any query
 
-Bots to filter: `Automation for Jira`, `Workato Integrations`, `BT Genie`,
-`Assist`, `Atlassian Assist`. Most status noise in a thread is these, and
-sorting by `updated` alone will tell you a ticket moved yesterday when nothing
-human has happened in three months.
+`Workato Integrations` is **not a bot.** It relays human comments, prefixed
+`**Comment by** @someone`, and it also posts automation. Filtering it by author
+name throws away real comments — including Mark's own — and then reports the
+wrong person as last to speak.
 
-`Workato Integrations` is ambiguous — it both relays human comments ("**Comment
-by** @someone") and posts automation. Read the body, not the author.
+This is not hypothetical. On 2026-10-20 that exact filter made BTSUP-77725,
+BTSUP-77579 and BTSUP-69584 read as "waiting on Mark" when he had already
+delivered the work and was the last to speak. Four tickets got a wrong reply,
+one requester was confused into asking "anything you need from me?", and Mark
+had to correct the thread himself. `BTS-070` exists to stop it recurring.
+
+So: resolve the true author from the body first, then classify.
+
+```
+if author is "Workato Integrations":
+    if body starts with "**Comment by** @X":  true author = X
+    else:                                      automation, skip
+```
+
+Only these are unconditionally automation: `Automation for Jira`, `BT Genie`,
+`Assist`, `Atlassian Assist`. Most status noise is these, and sorting by
+`updated` alone will say a ticket moved yesterday when nothing human has
+happened in three months.
+
+### Read the last two, never the last one
+
+One message tells you who typed most recently. **Two tell you what was asked and
+whether it was answered** — which is what decides the next step and who owns it.
+
+On BTSUP-76347 the last message was Brandon confirming the Okta mapping; the one
+before it was Mark asking Brandon to check. That pair says the *colleague* loop
+closed and the *user* loop — Megan, still blocked — is open. Reading one line
+pointed the reply at Brandon and asked an abstract question. `BTS-071`.
+
+### Then classify
+
+| Last true author | Ticket open | Action |
+|---|---|---|
+| Mark | yes | **close or follow up** (`BTS-072`) — never ask for scope already satisfied |
+| requester | yes | ours to answer |
+| colleague, answering Mark | yes | the user loop is probably still open — reply to **the user** (`BTS-073`) |
+
+Addressing matters as much as content: name the person whose action closes the
+ticket and give them exactly one thing to do. A colleague who answered an
+internal question is not the audience; the person who cannot do their job is.
 
 ## 3. Closing a ticket properly
 

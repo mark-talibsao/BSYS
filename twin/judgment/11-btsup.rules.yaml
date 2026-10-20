@@ -493,3 +493,94 @@ rules:
   provenance: { source: correction, cases: [C-2026-10-20-0008] }
   confidence: 0.5
   added: 2026-10-20
+
+# ── H. Learned 2026-10-20, from getting four tickets wrong ──────────────────
+#
+# Mark reviewed the close-out pass and found real errors. All four traced to
+# the same two mistakes: treating the relay account as a bot, and reading only
+# the last message instead of the last exchange.
+
+- id: BTS-070
+  title: The relay account is not a bot
+  status: proposed
+  precedence: 96
+  when:
+    - { field: ticket.last_comment_author, op: eq, value: relay_account }
+  then:
+    require: [read_relayed_body_for_true_author]
+    escalate: "Last comment is from the relay account — resolve the true author from the body before deciding who is waiting."
+  because: >
+    `Workato Integrations` relays human comments as "**Comment by** @someone".
+    Filtering it as a bot discards real comments — including Mark's own — and
+    then mis-identifies who spoke last. This is exactly how BTSUP-77725,
+    BTSUP-77579 and BTSUP-69584 were read as waiting on Mark when he had
+    already delivered the work and was the last to speak. The btsup playbook
+    said "read the body, not the author" and the query ignored it; the rule
+    exists so the instruction cannot be skipped silently again.
+  provenance: { source: correction, cases: [], note: "Mark, 2026-10-20, on the close-out pass" }
+  confidence: 0.5
+  added: 2026-10-20
+
+- id: BTS-071
+  title: Read the last two messages, not the last one
+  status: proposed
+  precedence: 94
+  when:
+    - { field: ticket.messages_read, op: lt, value: 2 }
+  then:
+    require: [read_last_two_messages]
+    escalate: "Decide from the last exchange, not the last line."
+  because: >
+    Mark's words: "the last two message will lead us to the correct action."
+    One message tells you who typed most recently; two tell you what was asked
+    and whether it was answered. On BTSUP-76347 the last message was Brandon
+    confirming Okta — but the message before it was Mark asking Brandon, which
+    means that loop closed and the open one is with the user who is still
+    blocked. Reading one line pointed the reply at the wrong person.
+  provenance: { source: correction, cases: [], note: "Mark, 2026-10-20" }
+  confidence: 0.5
+  added: 2026-10-20
+
+- id: BTS-072
+  title: Last touch is ours and the ticket is open — close or follow up
+  status: proposed
+  precedence: 87
+  when:
+    all:
+      - { field: ticket.last_touch, op: eq, value: ours }
+      - { field: ticket.status_closed, op: ne, value: true }
+  then:
+    set: { disposition: FOLLOW_UP }
+    require: [restate_what_was_delivered]
+  because: >
+    "If the ticket is still open and I am the last touch, then we might want to
+    close the ticket or follow up." Those are the only two moves. Asking the
+    requester for scope we already satisfied is worse than silence: on
+    BTSUP-77725 and BTSUP-77579 the connections were already built and shared,
+    and asking "which workspace, read or write?" told the requester their
+    systems owner had lost the thread. On BTSUP-77579 it made Megan ask
+    "anything you need from me?" and Mark had to correct it himself.
+  provenance: { source: correction, cases: [], note: "Mark, 2026-10-20" }
+  confidence: 0.5
+  added: 2026-10-20
+
+- id: BTS-073
+  title: Address the reply to whoever unblocks it
+  status: proposed
+  precedence: 86
+  when:
+    all:
+      - { field: ticket.user_awaiting_response, op: eq, value: true }
+      - { field: ticket.last_comment_author_role, op: eq, value: colleague }
+  then:
+    require: [address_impacted_user_by_name, concrete_next_action]
+  because: >
+    "The message should have been addressed to the impacted user." A colleague
+    answering an internal question is not the audience; the person who cannot
+    do their job is. On BTSUP-76347 the reply thanked Brandon and posed an
+    abstract profile question, when the obvious next step was to tell Megan the
+    Okta mapping is fixed and ask her to retest. Reply to the person whose
+    action closes the ticket, name them, and give them one thing to do.
+  provenance: { source: correction, cases: [], note: "Mark, 2026-10-20" }
+  confidence: 0.5
+  added: 2026-10-20
