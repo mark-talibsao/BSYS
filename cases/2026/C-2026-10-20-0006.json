@@ -56,6 +56,13 @@
     "domain": "btsup",
     "blocked": true
   },
-  "verdict": null,
+  "verdict": {
+    "outcome": "edited",
+    "corrected": {
+      "disposition": "CLOSE_STALE"
+    },
+    "why": "Closed because Freshdesk is being deprecated; the general rule is two follow-ups, then close if no actionable response",
+    "at": "2026-10-20T14:12:32+00:00"
+  },
   "supersedes": null
 }

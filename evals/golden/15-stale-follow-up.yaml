@@ -1,0 +1,18 @@
+# Stale, nobody has chased the user yet. Two follow-ups is the bar Mark set.
+domain: btsup
+ticket:
+  mark_involved: assigned
+  asks_for: [bug]
+  app: salesforce
+  owning_team: bt
+  days_since_last_response: 40
+  followups_sent: 0
+  actionable_response_received: false
+  last_human_comment_is_resolution: false
+action: {kind: comment, system: jira, environment: production, audience: internal, reversible: true, records_affected: 0}
+expect:
+  disposition: FOLLOW_UP
+  must_fire: [BTS-051]
+  must_not_fire: [BTS-052]
+# Why golden: closing before two follow-ups is a brush-off. This rule is the
+# only thing standing between a quiet ticket and a 147-day one.

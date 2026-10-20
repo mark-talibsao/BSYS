@@ -9,6 +9,11 @@ Design notes worth keeping in mind before editing:
 * A missing field fails its predicate rather than raising. Incoming requests are
   ragged; a rule set that crashes on a half-filled intake form is a rule set
   nobody runs. `missing` and `none` are the deliberate exceptions.
+* A rule may declare `then.stop: true`, making it terminal: when it matches,
+  rules of *lower* precedence are not evaluated at all. This exists for scope
+  gates. "This ticket is not mine" has to mean no further rule contributes,
+  otherwise domain rules fire on work that was never ours and drag the
+  decision's confidence around for no reason.
 * Equal-precedence conflicts are never resolved silently. The field is left
   unset and the decision escalates, because silent arbitrary resolution is how a
   rule set rots without anyone noticing.
@@ -211,7 +216,17 @@ def load(domain: str) -> list[Rule]:
 
 
 def apply(ctx: dict, rules: Iterable[Rule]) -> Outcome:
-    """Fire every matching rule and resolve the result."""
+    """Fire every matching rule and resolve the result.
+
+    A matching terminal rule (`then.stop: true`) first prunes everything below
+    its precedence, so a scope gate genuinely gates.
+    """
+    rules = [r for r in rules if r.status != "retired"]
+    gates = [r for r in rules if r.then.get("stop") and test(ctx, r.when)]
+    if gates:
+        floor = max(g.precedence for g in gates)
+        rules = [r for r in rules if r.precedence >= floor]
+
     out = Outcome()
     # field -> (precedence, value, rule_id)
     claims: dict[str, tuple[int, Any, str]] = {}
@@ -219,8 +234,6 @@ def apply(ctx: dict, rules: Iterable[Rule]) -> Outcome:
     fired: list[Rule] = []
 
     for rule in rules:
-        if rule.status == "retired":
-            continue
         if not test(ctx, rule.when):
             continue
         fired.append(rule)

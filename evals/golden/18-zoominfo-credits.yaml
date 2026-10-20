@@ -1,0 +1,17 @@
+# BTSUP-77631 corrected. Marketing Ops owns whether credits are bought; the
+# ZoomInfo admin is who reissues them.
+domain: btsup
+ticket:
+  mark_involved: assigned
+  asks_for: [credits]
+  app: zoominfo
+  owning_team: bt
+  requires_recipe_change: false
+action: {kind: reissue_credits, system: zoominfo, environment: production, audience: internal, reversible: true, records_affected: 0}
+expect:
+  disposition: ROUTE
+  owner: bt_support_zoominfo_admin
+  must_fire: [BTS-033]
+  must_not_fire: [BTS-030]
+# Why golden: BTS-030 is retired for exactly this misroute. If it ever fires
+# again, the retirement has been undone by accident.

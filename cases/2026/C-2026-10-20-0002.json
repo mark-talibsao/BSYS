@@ -35,6 +35,13 @@
     "domain": "btsup",
     "blocked": true
   },
-  "verdict": null,
+  "verdict": {
+    "outcome": "edited",
+    "corrected": {
+      "disposition": "RESPOND"
+    },
+    "why": "Out of scope is not a reason to leave the user without an answer \u2014 digest what they said and reply substantively",
+    "at": "2026-10-20T14:12:32+00:00"
+  },
   "supersedes": null
 }

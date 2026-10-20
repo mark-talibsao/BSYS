@@ -1,0 +1,18 @@
+# BTSUP-61972 shape: chased twice, nothing actionable came back.
+domain: btsup
+ticket:
+  mark_involved: assigned
+  asks_for: [bug]
+  app: freshdesk
+  owning_team: other
+  days_since_last_response: 147
+  followups_sent: 2
+  actionable_response_received: false
+  last_human_comment_is_resolution: false
+  user_awaiting_response: false
+action: {kind: close_ticket, system: jira, environment: production, audience: internal, reversible: true, records_affected: 1}
+expect:
+  disposition: CLOSE_STALE
+  must_fire: [BTS-052]
+# Why golden: the close is not a verdict on the request, it is an admission the
+# thread has no information left. `require` must keep carrying a closing reason.

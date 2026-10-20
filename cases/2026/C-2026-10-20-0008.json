@@ -36,6 +36,13 @@
     "domain": "btsup",
     "blocked": true
   },
-  "verdict": null,
+  "verdict": {
+    "outcome": "edited",
+    "corrected": {
+      "owner": "bt_support_any_online"
+    },
+    "why": "Any BT Support member can provision BoostUp via Firefighter; the only gate is the user holding a Salesforce full license",
+    "at": "2026-10-20T14:12:32+00:00"
+  },
   "supersedes": null
 }

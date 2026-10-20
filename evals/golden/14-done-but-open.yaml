@@ -1,0 +1,19 @@
+# BTSUP-69368 shape: the requester said thanks, the ticket stayed open 96 days.
+domain: btsup
+ticket:
+  mark_involved: assigned
+  asks_for: [app_access]
+  app: certinia
+  owning_team: bt
+  last_human_comment_is_resolution: true
+  status_closed: false
+  days_since_last_response: 96
+  followups_sent: 0
+action: {kind: close_ticket, system: jira, environment: production, audience: internal, reversible: true, records_affected: 1}
+expect:
+  disposition: RESOLVE_AND_CLOSE
+  must_fire: [BTS-050]
+  must_not_fire: [BTS-051]
+# Why golden: six of thirty-three open tickets were finished work. If BTS-050
+# stops firing, the queue silently refills with completed work and the genuinely
+# stuck items disappear behind it.

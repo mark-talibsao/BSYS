@@ -1,0 +1,17 @@
+# BTSUP-78597 corrected. Needs no specialist — should not wait in Mark's queue.
+domain: btsup
+ticket:
+  mark_involved: assigned
+  asks_for: [app_access]
+  app: boostup
+  owning_team: bt
+  requires_license: true
+  license_provisioned: false
+action: {kind: provision_user, system: boostup, environment: production, audience: internal, reversible: true, records_affected: 1}
+expect:
+  disposition: ROUTE
+  owner: bt_support_any_online
+  must_fire: [BTS-054, BTS-020]
+# Why golden: BTS-020 still fires and still loses. The license gate is real,
+# but it is a Salesforce license and any online BT Support member can action
+# it. Routing this to Firefighter-and-wait is what left it sitting in triage.

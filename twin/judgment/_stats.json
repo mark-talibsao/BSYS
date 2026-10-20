@@ -1,1 +1,38 @@
-{}
+{
+  "BTS-002": {
+    "fired": 2,
+    "last": "C-2026-10-20-0006",
+    "overturned": 2,
+    "upheld": 0
+  },
+  "BTS-010": {
+    "fired": 1,
+    "last": "C-2026-10-20-0006",
+    "overturned": 1,
+    "upheld": 0
+  },
+  "BTS-020": {
+    "fired": 1,
+    "last": "C-2026-10-20-0008",
+    "overturned": 1,
+    "upheld": 0
+  },
+  "BTS-030": {
+    "fired": 1,
+    "last": "C-2026-10-20-0001",
+    "overturned": 1,
+    "upheld": 0
+  },
+  "BTS-041": {
+    "fired": 1,
+    "last": "C-2026-10-20-0006",
+    "overturned": 1,
+    "upheld": 0
+  },
+  "RSK-005": {
+    "fired": 4,
+    "last": "C-2026-10-20-0006",
+    "overturned": 0,
+    "upheld": 4
+  }
+}

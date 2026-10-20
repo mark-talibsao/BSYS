@@ -1,0 +1,19 @@
+# BTSUP-77148 shape: genuinely not BT's product, and the user is still waiting.
+domain: btsup
+ticket:
+  mark_involved: assigned
+  asks_for: [question]
+  app: outreach
+  owning_team: other
+  user_awaiting_response: true
+  days_since_last_response: 14
+  followups_sent: 0
+  last_human_comment_is_resolution: false
+action: {kind: comment, system: jira, environment: production, audience: internal, reversible: true, records_affected: 0}
+expect:
+  disposition: RESPOND
+  must_fire: [BTS-053, BTS-002]
+# Why golden: BTS-002 still fires — the scope judgement was correct. BTS-053
+# outranks it at 90 because out of scope is a statement about ownership, never
+# a licence to go quiet. If RESPOND ever loses this contest, the system has
+# learned to close tickets on people.

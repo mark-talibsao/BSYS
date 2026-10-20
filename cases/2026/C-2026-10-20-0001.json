@@ -36,6 +36,13 @@
     "domain": "btsup",
     "blocked": true
   },
-  "verdict": null,
+  "verdict": {
+    "outcome": "edited",
+    "corrected": {
+      "owner": "bt_support_zoominfo_admin"
+    },
+    "why": "ZoomInfo credits need manual processing \u2014 internal comment first, then route to the BT Support ZoomInfo admin user, not Marketing Ops",
+    "at": "2026-10-20T14:12:32+00:00"
+  },
   "supersedes": null
 }
