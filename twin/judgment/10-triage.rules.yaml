@@ -96,7 +96,7 @@ rules:
 
 - id: TRI-010
   title: Access or permission provisioning
-  status: active
+  status: retired
   precedence: 70
   when:
     any:
@@ -107,6 +107,20 @@ rules:
   because: >
     Security owns the control. If I provision around them once, I become the
     shadow access path and the audit finds it eventually.
+  retired:
+    on: 2026-10-20
+    by: retro-mining
+    reason: >
+      Wrong, and wrong about the largest category of real inbound. Access is
+      the single most common ask in #ask-bt and BTSUP, and Mark handles most of
+      it himself — DemandBase MCP grants, Salesforce permission sets, Gong
+      enablement, Workato connections. Blanket-routing it to IT/Security would
+      have misrouted a large share of his actual queue. The true split is
+      three-way and is now encoded in the btsup domain: licensed-app
+      provisioning goes to Firefighter (BTS-020), identity and endpoint
+      problems go to IT (BTS-031), and permission or configuration inside a
+      GTM app he owns is his to do. Kept as evidence of how confidently an
+      authored rule can be wrong about a domain nobody had looked at yet.
   provenance: { source: authored, cases: [] }
   confidence: 0.95
   added: 2026-10-20

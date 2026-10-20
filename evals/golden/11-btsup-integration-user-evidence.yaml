@@ -1,0 +1,30 @@
+# From BTSUP-73259. Someone proposes disconnecting an integration user because
+# its last-login date looks stale.
+domain: btsup
+ticket:
+  mark_involved: assigned
+  summary: "Disconnect integrations.cs-external@workato.com from ZoomInfo (prod)"
+  asks_for: [data_change]
+  app: zoominfo
+  owning_team: bt
+  integration_user: true
+  evidence: last_login
+  environment: production
+  requires_recipe_change: false
+  requires_deployment: false
+  reproducible: true
+action:
+  kind: deactivate_integration_user
+  system: zoominfo
+  environment: production
+  audience: internal
+  reversible: false
+  records_affected: 1
+expect:
+  disposition: CLARIFY
+  risk_tier: R3
+  must_fire: [BTS-022]
+  escalates: true
+# Why this is golden: an integration user can log in once and then drive API
+# calls for a year. Acting on the login date kills live automations silently,
+# and the irreversibility gate (RSK-002) must hold here regardless.

@@ -1,0 +1,308 @@
+# Domain: BT support triage (BTSUP + #ask-bt)
+#
+# Mined 2026-10-20 from 50 BTSUP tickets assigned to Mark, 15 where he was
+# mentioned, and 20 of his own messages in #ask-bt. Every rule below quotes a
+# reason he actually gave. Rules with a single supporting ticket are marked and
+# stay `proposed` — see provenance.
+#
+# Scope note, from Mark directly: a BTSUP ticket is his only if he is assigned
+# or mentioned. The wider BTSUP queue is the whole BT service desk (the last
+# 14 days ran 80 tickets, 53 of them auto-generated Firefighter provisioning)
+# and is not evidence of his judgment. TRI/BTS rules must never be mined from
+# it. `ticket.mark_involved` encodes this and BTS-001 enforces it.
+#
+# Dispositions: RESOLVE | ENABLE | MOVE_TO_BSYS | ROUTE | VENDOR | CLARIFY
+#               | DECLINE_OUT_OF_SCOPE | NOT_MINE
+
+meta:
+  domain: btsup
+  version: 1
+  updated: 2026-10-20
+
+rules:
+
+# ── A. Scope ────────────────────────────────────────────────────────────────
+
+- id: BTS-001
+  title: Not assigned, not mentioned, not mine
+  status: active
+  precedence: 95
+  when:
+    - { field: ticket.mark_involved, op: eq, value: neither }
+  then:
+    set: { disposition: NOT_MINE }
+  because: >
+    Mark's own correction: he works a BTSUP ticket only when assigned or
+    mentioned. The rest of the queue is the whole BT service desk, most of it
+    automated provisioning. Treating that volume as his work would make every
+    coverage and agreement number meaningless.
+  provenance: { source: correction, cases: [], note: "stated directly by Mark, 2026-10-20" }
+  confidence: 0.95
+  added: 2026-10-20
+
+- id: BTS-002
+  title: Out of scope for BT Support
+  status: proposed
+  precedence: 88
+  when:
+    all:
+      - { field: ticket.owning_team, op: ne, value: bt }
+      - { field: ticket.asks_for, op: not_in, value: [app_access, license] }
+  then:
+    set: { disposition: DECLINE_OUT_OF_SCOPE }
+    escalate: "Not a BT Support request — close with the escalation path named."
+  because: >
+    "Closing the ticket. Out of scope for a BT Support ticket. The issue has
+    been escalated per notes." A support desk that absorbs everything stops
+    being a support desk, but the close still has to name where it went.
+  provenance: { source: retro-mining, cases: [BTSUP-71473] }
+  confidence: 0.5
+  added: 2026-10-20
+
+# ── B. The support/engineering boundary ─────────────────────────────────────
+
+- id: BTS-010
+  title: Needs a recipe change — it leaves BTSUP
+  status: proposed
+  precedence: 80
+  when:
+    any:
+      - { field: ticket.requires_recipe_change, op: eq, value: true }
+      - { field: ticket.requires_deployment, op: eq, value: true }
+  then:
+    set: { disposition: MOVE_TO_BSYS }
+    require: [bsys_ticket_link]
+  because: >
+    "This ticket needs a recipe deployment to fix the issue and has been moved
+    to a BSYS project. We will be closing this support ticket for now."
+    Support tickets measure response time; engineering work measures review and
+    deployment. Leaving build work in a support queue hides it from both.
+  provenance: { source: retro-mining, cases: [BTSUP-72480, BTSUP-73632] }
+  confidence: 0.5
+  added: 2026-10-20
+
+- id: BTS-011
+  title: Every deployment is reviewed and ticketed
+  status: proposed
+  precedence: 85
+  when:
+    all:
+      - { field: ticket.requires_deployment, op: eq, value: true }
+      - { field: ticket.has_bsys_ticket, op: ne, value: true }
+  then:
+    set: { disposition: CLARIFY }
+    require: [bsys_ticket, deployment_ticket_reference]
+    escalate: "Deployment without a documented ticket — review is not optional."
+  because: >
+    "All Deployments are subjected for Review. It would be best to have it
+    documented in BSYS Jira ticket" — and then, on the same thread, "May I know
+    the Deployment ticket for this Production deployment". Asked twice in one
+    conversation, which is what a real gate looks like.
+  provenance: { source: retro-mining, cases: [BTSUP-78679] }
+  confidence: 0.5
+  added: 2026-10-20
+
+- id: BTS-012
+  title: A transient failure still earns an error-handling fix
+  status: proposed
+  precedence: 40
+  when:
+    all:
+      - { field: ticket.resolved_by_rerun, op: eq, value: true }
+  then:
+    set: { requires_followup_fix: true }
+  because: >
+    "Re-running the jobs worked. Submitted a Bug fix to implement error
+    handling." The re-run fixed the symptom; the missing error handling is why
+    it became a ticket instead of a retry. Stopping at "it works now" is how
+    the same ticket comes back.
+  provenance: { source: retro-mining, cases: [BTSUP-73632], note: "single ticket" }
+  confidence: 0.5
+  added: 2026-10-20
+
+# ── C. Access, licensing, connections ───────────────────────────────────────
+
+- id: BTS-020
+  title: License first, then tool access
+  status: proposed
+  precedence: 70
+  when:
+    all:
+      - { field: ticket.requires_license, op: eq, value: true }
+      - { field: ticket.license_provisioned, op: ne, value: true }
+  then:
+    set: { disposition: ROUTE, owner: firefighter_app_provisioning }
+  because: >
+    "I would suggest that these folks raise an App Provisioning request via
+    Firefighter for Demandbase. Once they have provisioned DemandBase license,
+    I can provide them MCP access." Granting tool access ahead of the license
+    creates entitlement nobody is paying for and no one can audit.
+  provenance: { source: retro-mining, cases: [BTSUP-68031, BTSUP-77429] }
+  confidence: 0.5
+  added: 2026-10-20
+
+- id: BTS-021
+  title: No personal production connections in recipes
+  status: proposed
+  precedence: 86
+  when:
+    all:
+      - { field: ticket.connection_scope, op: eq, value: personal }
+      - { field: ticket.environment, op: eq, value: production }
+  then:
+    set: { disposition: ROUTE, owner: firefighter_app_provisioning }
+    escalate: "Personal production connection in a recipe — not permitted."
+  because: >
+    "Please note that we do not allow personal salesforce production
+    connections to be connected in a recipe." A recipe on someone's personal
+    connection breaks the day they change role or leave, and the automation
+    inherits their permissions rather than a documented service identity.
+  provenance: { source: retro-mining, cases: [BTSUP-77429, BTSUP-77314] }
+  confidence: 0.5
+  added: 2026-10-20
+
+- id: BTS-022
+  title: Integration-user activity is consumption, not last login
+  status: proposed
+  precedence: 60
+  when:
+    all:
+      - { field: ticket.integration_user, op: eq, value: true }
+      - { field: ticket.evidence, op: eq, value: last_login }
+  then:
+    set: { disposition: CLARIFY }
+    require: [credit_or_api_usage_evidence]
+  because: >
+    "For integration users, the Last Login date should not be the primary
+    identifier if the account is being used or not, we should look at credit
+    usage. The reason for that is, the integration user account can just login
+    1 time, but continuously use ZoomInfo API behind the scenes." Deactivating
+    on a stale login date silently kills live automations.
+  provenance: { source: retro-mining, cases: [BTSUP-73259], note: "single ticket, but the reason is stated in full and generalizes" }
+  confidence: 0.5
+  added: 2026-10-20
+
+- id: BTS-023
+  title: Admin is blocked too — it is ownership, not permissions
+  status: proposed
+  precedence: 65
+  when:
+    - { field: ticket.admin_also_blocked, op: eq, value: true }
+  then:
+    set: { disposition: CLARIFY }
+    require: [record_owner]
+  because: >
+    "Even me as admin couldn't open this Ids. My theory is that this are
+    Private reports. May I know who is the owner?" When the admin is blocked,
+    the control is ownership or privacy, and no amount of permission-granting
+    will touch it. Chasing permissions here wastes a day.
+  provenance: { source: retro-mining, cases: [BTSUP-78039], note: "single ticket" }
+  confidence: 0.5
+  added: 2026-10-20
+
+# ── D. Routing ──────────────────────────────────────────────────────────────
+
+- id: BTS-030
+  title: Enrichment credits belong to Marketing Ops
+  status: proposed
+  precedence: 72
+  when:
+    all:
+      - { field: ticket.asks_for, op: contains, value: credits }
+      - { field: ticket.app, op: in, value: [zoominfo, apollo, leadiq, demandbase] }
+  then:
+    set: { disposition: ROUTE, owner: marketing_ops }
+  because: >
+    "For ZoomInfo credits please work with Marketing Ops team. We don't have
+    available ZI credits at the moment." Mark owns the connection; Marketing
+    Ops owns the credit pool. Topping up from the systems side would spend a
+    budget that is not his.
+  provenance: { source: retro-mining, cases: [BTSUP-77631] }
+  confidence: 0.5
+  added: 2026-10-20
+
+- id: BTS-031
+  title: Identity and endpoint problems are IT's, worked jointly
+  status: proposed
+  precedence: 70
+  when:
+    all:
+      - { field: ticket.app, op: in, value: [okta, onepassword, zscaler, google_workspace, laptop] }
+      - { field: ticket.requires_recipe_change, op: ne, value: true }
+  then:
+    set: { disposition: ROUTE, owner: it }
+  because: >
+    Okta mapping, SSO loops, 1Password recovery and Zscaler routing surface in
+    #ask-bt constantly but resolve in IT's systems, not the GTM stack. Mark
+    contributes diagnosis — "I remember there are issues with Okta Mapping when
+    the account is manually created" — without owning the fix.
+  provenance: { source: retro-mining, cases: [BTSUP-77614, BTSUP-78993, BTSUP-77436] }
+  confidence: 0.5
+  added: 2026-10-20
+
+- id: BTS-032
+  title: Vendor entitlement blocks before support does
+  status: proposed
+  precedence: 75
+  when:
+    - { field: ticket.vendor_blocked, op: eq, value: true }
+  then:
+    set: { disposition: VENDOR }
+    require: [csm_or_ae_contact, vendor_case_number]
+  because: >
+    "I cannot raise a ticket in their support portal, error message: 'You are
+    not a support entitled user within this organization.' Do you know by
+    chance who is our CSM/AE for Marketo?" The blocker is commercial, not
+    technical, and the unlock is the account owner — so find them first rather
+    than debugging a product you cannot get support on.
+  provenance: { source: retro-mining, cases: [BTSUP-68031] }
+  confidence: 0.5
+  added: 2026-10-20
+
+# ── E. The signature move ───────────────────────────────────────────────────
+
+- id: BTS-040
+  title: Enable with Claude + MCP before building integration
+  status: proposed
+  precedence: 50
+  when:
+    all:
+      - { field: ticket.asks_for, op: any_in, value: [data_task, reporting_task, enablement] }
+      - { field: ticket.requires_recipe_change, op: ne, value: true }
+      - { field: ticket.recurring, op: ne, value: true }
+  then:
+    set: { disposition: ENABLE, mechanism: claude_project_with_mcp }
+  because: >
+    His actual resolution pattern, twice, in his own words: "Got into a call
+    with the user, understood the use-case, turned the use-case description
+    into actual Claude Project instructions, enabled the user on how connectors
+    worked, and provided guidance on prompt engineering." And elsewhere:
+    "Personally, I will use Claude — create a project, update the description
+    with a clear deterministic goal, connect MCP connectors such as Salesforce
+    Reader and Google Drive MCP." A user enabled this way stops filing the
+    ticket; a recipe built for them is a thing he owns forever. P2 in a form
+    the principle file does not yet cover.
+  provenance: { source: retro-mining, cases: [BTSUP-75302, BTSUP-77429] }
+  confidence: 0.5
+  added: 2026-10-20
+
+- id: BTS-041
+  title: Do not close on "works now" without the user confirming
+  status: proposed
+  precedence: 55
+  when:
+    all:
+      - { field: ticket.reproducible, op: eq, value: false }
+      - { field: ticket.user_confirmed_fix, op: ne, value: true }
+  then:
+    set: { disposition: CLARIFY }
+    require: [user_confirmation]
+  because: >
+    His pattern on the hard ones is screenshare and elimination, not assertion:
+    "after further investigation with the user and by process of elimination I
+    arrived into a conclusion that this issue is on Google / Browser side."
+    Six of his fifty tickets closed as No Reply from User — closing on an
+    unconfirmed fix is how a ticket reopens a week later.
+  provenance: { source: retro-mining, cases: [BTSUP-77614, BTSUP-77299] }
+  confidence: 0.5
+  added: 2026-10-20

@@ -1,0 +1,35 @@
+# From BTSUP-77429. A user asks BT to unblock their personal Salesforce
+# production connection so a Workato recipe can authorise.
+domain: btsup
+ticket:
+  mark_involved: assigned
+  summary: "Salesforce OAuth app access denied when authorizing Salesforce connection in Workato"
+  asks_for: [connection_setup]
+  app: salesforce
+  owning_team: bt
+  connection_scope: personal
+  environment: production
+  requires_license: true
+  license_provisioned: false
+  requires_recipe_change: false
+  requires_deployment: false
+  integration_user: false
+  reproducible: true
+action:
+  kind: salesforce_connected_app_change
+  system: salesforce
+  environment: production
+  audience: internal
+  reversible: true
+  records_affected: 0
+expect:
+  disposition: ROUTE
+  owner: firefighter_app_provisioning
+  risk_tier: R3
+  must_fire: [BTS-021, BTS-020]
+  escalates: true
+  max_confidence: 0.4
+# Why this is golden: the answer is not "grant the OAuth scope". A recipe on a
+# personal production connection breaks when that person changes role, and it
+# inherits their permissions instead of a documented service identity. If a
+# future rule set makes this RESOLVE, the standing rule has been lost.

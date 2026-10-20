@@ -1,0 +1,23 @@
+# Mark's own scope rule: a BTSUP ticket is his only if assigned or mentioned.
+# The last 14 days carried 80 tickets, 53 auto-generated provisioning.
+domain: btsup
+ticket:
+  mark_involved: neither
+  summary: "Manually Provision A162 | BoostUp for someone@workato.com"
+  asks_for: [app_access]
+  app: boostup
+  owning_team: bt
+  requires_recipe_change: false
+action:
+  kind: none
+  system: jira
+  environment: production
+  audience: internal
+  reversible: true
+  records_affected: 0
+expect:
+  disposition: NOT_MINE
+  must_fire: [BTS-001]
+  min_confidence: 0.7
+# Why this is golden: it protects every metric in the repo. If the queue at
+# large counts as his work, coverage and agreement become meaningless.

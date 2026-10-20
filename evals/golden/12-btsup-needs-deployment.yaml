@@ -1,0 +1,28 @@
+# From BTSUP-72480. A support ticket whose real fix is a recipe deployment.
+domain: btsup
+ticket:
+  mark_involved: assigned
+  summary: "Salesforce address reverted, impacting NetSuite sync"
+  asks_for: [bug]
+  app: salesforce
+  owning_team: bt
+  requires_recipe_change: true
+  requires_deployment: true
+  has_bsys_ticket: false
+  environment: production
+  reproducible: true
+action:
+  kind: workato_recipe_edit
+  system: workato
+  environment: production
+  audience: internal
+  reversible: true
+  records_affected: 50
+expect:
+  must_fire: [BTS-010, BTS-011]
+  risk_tier: R3
+  escalates: true
+# Why this is golden: two rules fire and BTS-011 (precedence 85) outranks
+# BTS-010 (80), so an undocumented deployment is a CLARIFY before it is a
+# move. Support queues measure response time; deployments measure review.
+# Losing that order lets build work hide inside a support SLA.

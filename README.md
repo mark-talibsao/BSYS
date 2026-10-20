@@ -56,7 +56,8 @@ twin/
   judgment/
     README.md             the rule format — read this first
     00-core-principles.md invariants that outrank every rule below
-    10-triage.rules.yaml  pilot domain: request intake & triage
+    10-triage.rules.yaml  build-request triage (BSYS)
+    11-btsup.rules.yaml   BT support triage — mined from real tickets
     20-risk.rules.yaml    risk tiering — what may ever run unattended
   playbooks/              step-by-step procedures a agent can execute
   context/                the world model: systems, stakeholders, vocabulary
@@ -85,7 +86,21 @@ python3 -m lib.metrics
 
 ## Honest status
 
-Encoded today: **request intake & triage**, draft-only, ~20 seed rules mined from
-prior art and stated preference. Everything else in `twin/charter.md` is mapped
-but not yet encoded. Agreement rate is unmeasured until there are corrections —
-see `ops/metrics.md` for the bar this has to clear before anything is trusted.
+Two domains encoded, draft-only. **Build-request triage** (23 rules, authored)
+and **BT support triage** (14 rules, mined 2026-10-20 from 50 BTSUP tickets
+assigned to Mark, 15 where he was mentioned, and 20 of his own `#ask-bt`
+replies). 10 golden cases pass.
+
+Every mined rule is `status: proposed`, which caps decision confidence at 0.3
+and forces an escalation. That is correct: they are reconstructions of past
+calls, not things Mark stated in the abstract, and they stay provisional until
+corrections confirm them.
+
+The mining pass immediately retired `TRI-010`, an authored rule that routed all
+access requests to IT/Security. Access turned out to be the largest category of
+real inbound and mostly his to handle. The retirement reason is written into
+the rule — authored rules about unexamined domains are exactly where this
+system should expect to be wrong.
+
+Agreement rate is still unmeasured: there are no corrections yet. See
+`ops/metrics.md` for the bar this has to clear before anything is trusted.
