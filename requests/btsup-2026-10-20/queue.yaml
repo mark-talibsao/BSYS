@@ -101,3 +101,30 @@ tickets:
     license_provisioned: false
     requires_recipe_change: false
   action: {kind: provision_user, system: boostup, environment: production, audience: internal, reversible: true, records_affected: 1}
+
+# ── Close-out log, 2026-10-20 ───────────────────────────────────────────────
+# Applied with Mark's approval: close anything waiting on the requester past
+# 15 days; address what is waiting on him; flag what needs verification.
+#
+# Closed (comment -> transition -> resolution, per playbooks/btsup-triage.md §3):
+#   BTSUP-62883  139d  No Reply from User   Gong MCP fault raised, nothing back
+#   BTSUP-65626  138d  Advice Provided      Outreach clean; re-map Okta advised
+#   BTSUP-68162  111d  Done                 SFDC active + Certinia licensed
+#   BTSUP-69974   91d  Escalated - BT       escalated to BoostUp, no response
+#   BTSUP-70016   85d  Fixed                Quote tab exposed, unconfirmed
+#   BTSUP-70885   78d  Advice Provided      Marketing Analyst profile blocks ZI export
+#   BTSUP-73821   56d  No Reply from User   Outreach approval follow-up died
+#   BTSUP-75554   41d  Advice Provided      A2P 10DLC is Twilio owner's to action
+#   BTSUP-75897   40d  Done                 approval redirected and granted
+#   BTSUP-76171   39d  No Reply from User   prod deploy authz, nothing concluded
+#   BTSUP-76628   21d  Done                 Nooks OAuth set up, redirect registered
+#   BTSUP-69580   96d  Done                 user active, logged in 19 Oct — verified
+#
+# Still open and now moved forward:
+#   BTSUP-78597  internal note: SFDC license VERIFIED active -> any BT Support
+#   BTSUP-62397  internal note: SFDC user INACTIVE -> license gate fails
+#   BTSUP-69584  prod is healthy but the ask is the Dev sandbox -> Awaiting info
+#   BTSUP-76347  profile/role coherent; asked which action is failing -> Awaiting info
+#   BTSUP-77725  asked Dev-vs-Prod and read-vs-write; stated the shared-identity rule
+#   BTSUP-75406  needs a manual Zoom Marketplace approval; asked if still wanted
+#   BTSUP-77579  Direct workspace already has the connections; asked scope
