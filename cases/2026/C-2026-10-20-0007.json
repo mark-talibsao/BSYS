@@ -1,0 +1,40 @@
+{
+  "id": "C-2026-10-20-0007",
+  "created": "2026-10-20T13:46:08+00:00",
+  "domain": "btsup",
+  "request": {
+    "mark_involved": "assigned",
+    "asks_for": [
+      "permission_change"
+    ],
+    "app": "salesforce",
+    "owning_team": "bt",
+    "requires_recipe_change": false,
+    "reproducible": true,
+    "user_confirmed_fix": false,
+    "jira_key": "BTSUP-74233",
+    "note": "ASV section not visible on a closed Opportunity. Requester asked directly for help on the ASV object."
+  },
+  "decision": {
+    "rules_fired": [],
+    "conflicts": [],
+    "escalate": [
+      "confidence 0.10 below 0.5 floor",
+      "no disposition set \u2014 falling back to CLARIFY"
+    ],
+    "require": [],
+    "confidence": 0.1,
+    "novel": true,
+    "risk_tier": "R3",
+    "risk_rules_fired": [
+      "RSK-005",
+      "RSK-006"
+    ],
+    "autonomy": "draft_only",
+    "disposition": "CLARIFY",
+    "domain": "btsup",
+    "blocked": true
+  },
+  "verdict": null,
+  "supersedes": null
+}

@@ -1,0 +1,61 @@
+{
+  "id": "C-2026-10-20-0005",
+  "created": "2026-10-20T13:46:08+00:00",
+  "domain": "btsup",
+  "request": {
+    "mark_involved": "assigned",
+    "asks_for": [
+      "credits",
+      "app_access"
+    ],
+    "app": "demandbase",
+    "owning_team": "bt",
+    "vendor_blocked": true,
+    "requires_license": true,
+    "license_provisioned": false,
+    "requires_recipe_change": false,
+    "jira_key": "BTSUP-68031",
+    "note": "DemandBase MCP credits exhausted; Mark asked Kevin/Floyd about procuring more. Blocked on commercial owner."
+  },
+  "decision": {
+    "disposition": "VENDOR",
+    "owner": "marketing_ops",
+    "rules_fired": [
+      "BTS-020",
+      "BTS-030",
+      "BTS-032"
+    ],
+    "conflicts": [
+      {
+        "field": "owner",
+        "winner": "BTS-030",
+        "loser": "BTS-020",
+        "reason": "precedence"
+      },
+      {
+        "field": "disposition",
+        "winner": "BTS-032",
+        "loser": "BTS-030",
+        "reason": "precedence"
+      }
+    ],
+    "escalate": [
+      "confidence 0.30 below 0.5 floor"
+    ],
+    "require": [
+      "csm_or_ae_contact",
+      "vendor_case_number"
+    ],
+    "confidence": 0.3,
+    "novel": false,
+    "risk_tier": "R3",
+    "risk_rules_fired": [
+      "RSK-005"
+    ],
+    "autonomy": "draft_only",
+    "domain": "btsup",
+    "blocked": true
+  },
+  "verdict": null,
+  "supersedes": null
+}

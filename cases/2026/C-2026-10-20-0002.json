@@ -1,0 +1,40 @@
+{
+  "id": "C-2026-10-20-0002",
+  "created": "2026-10-20T13:46:08+00:00",
+  "domain": "btsup",
+  "request": {
+    "mark_involved": "assigned",
+    "asks_for": [
+      "question"
+    ],
+    "app": "outreach",
+    "owning_team": "other",
+    "requires_recipe_change": false,
+    "requires_deployment": false,
+    "jira_key": "BTSUP-77148",
+    "note": "Image compression under 100KB. 20 comments. Outreach support already engaged."
+  },
+  "decision": {
+    "disposition": "DECLINE_OUT_OF_SCOPE",
+    "rules_fired": [
+      "BTS-002"
+    ],
+    "conflicts": [],
+    "escalate": [
+      "BTS-002: Not a BT Support request \u2014 close with the escalation path named.",
+      "confidence 0.30 below 0.5 floor"
+    ],
+    "require": [],
+    "confidence": 0.3,
+    "novel": false,
+    "risk_tier": "R3",
+    "risk_rules_fired": [
+      "RSK-005"
+    ],
+    "autonomy": "draft_only",
+    "domain": "btsup",
+    "blocked": true
+  },
+  "verdict": null,
+  "supersedes": null
+}

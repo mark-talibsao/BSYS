@@ -1,0 +1,103 @@
+# Triage intake for the 8 open tickets that need a call, 2026-10-20.
+# Field values are read off the ticket threads — see playbooks/intake-triage.md.
+tickets:
+
+- key: BTSUP-77631
+  note: "Marc Parilla asked whether Nooks ZoomInfo credits differ from the usual pool."
+  ticket:
+    mark_involved: assigned
+    asks_for: [credits]
+    app: zoominfo
+    owning_team: bt
+    requires_recipe_change: false
+    requires_deployment: false
+    reproducible: true
+  action: {kind: reissue_credits, system: zoominfo, environment: production, audience: internal, reversible: true, records_affected: 0}
+
+- key: BTSUP-77148
+  note: "Image compression under 100KB. 20 comments. Outreach support already engaged."
+  ticket:
+    mark_involved: assigned
+    asks_for: [question]
+    app: outreach
+    owning_team: other
+    requires_recipe_change: false
+    requires_deployment: false
+  action: {kind: advise, system: outreach, environment: production, audience: internal, reversible: true, records_affected: 0}
+
+- key: BTSUP-77725
+  note: "Create a Gong connection in the CS TFO workspace. Precedent: BTSUP-77314."
+  ticket:
+    mark_involved: assigned
+    asks_for: [connection_setup]
+    app: gong
+    owning_team: bt
+    connection_scope: shared_workspace
+    environment: production
+    requires_license: false
+    requires_recipe_change: false
+    reproducible: true
+  action: {kind: create_workato_connection, system: workato, environment: production, audience: internal, reversible: true, records_affected: 0}
+
+- key: BTSUP-76347
+  note: "Brandon Tang confirmed Okta mapping is clean — identity side closed, SFDC profile side is ours."
+  ticket:
+    mark_involved: assigned
+    asks_for: [permission_change]
+    app: salesforce
+    owning_team: bt
+    requires_recipe_change: false
+    reproducible: true
+    user_confirmed_fix: false
+  action: {kind: sfdc_profile_update, system: salesforce, environment: production, audience: internal, reversible: true, records_affected: 1}
+
+- key: BTSUP-68031
+  note: "DemandBase MCP credits exhausted; Mark asked Kevin/Floyd about procuring more. Blocked on commercial owner."
+  ticket:
+    mark_involved: assigned
+    asks_for: [credits, app_access]
+    app: demandbase
+    owning_team: bt
+    vendor_blocked: true
+    requires_license: true
+    license_provisioned: false
+    requires_recipe_change: false
+  action: {kind: grant_mcp_access, system: demandbase, environment: production, audience: internal, reversible: true, records_affected: 0}
+
+- key: BTSUP-61972
+  note: "Zoom reminders firing Freshdesk ticket emails. Last human comment 2026-05-26, 147 days ago."
+  ticket:
+    mark_involved: assigned
+    asks_for: [bug]
+    app: freshdesk
+    owning_team: other
+    requires_recipe_change: true
+    requires_deployment: false
+    has_bsys_ticket: false
+    reproducible: false
+    user_confirmed_fix: false
+  action: {kind: investigate, system: freshdesk, environment: production, audience: internal, reversible: true, records_affected: 0}
+
+- key: BTSUP-74233
+  note: "ASV section not visible on a closed Opportunity. Requester asked directly for help on the ASV object."
+  ticket:
+    mark_involved: assigned
+    asks_for: [permission_change]
+    app: salesforce
+    owning_team: bt
+    requires_recipe_change: false
+    reproducible: true
+    user_confirmed_fix: false
+  action: {kind: sfdc_page_layout_check, system: salesforce, environment: production, audience: internal, reversible: true, records_affected: 0}
+
+- key: BTSUP-78597
+  note: "Automated BoostUp A162 provisioning task. No human has commented."
+  ticket:
+    mark_involved: assigned
+    asks_for: [app_access]
+    app: boostup
+    owning_team: bt
+    requires_license: true
+    license_provisioned: false
+    requires_recipe_change: false
+  action: {kind: provision_user, system: boostup, environment: production, audience: internal, reversible: true, records_affected: 1}

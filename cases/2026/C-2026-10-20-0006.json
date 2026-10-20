@@ -1,0 +1,61 @@
+{
+  "id": "C-2026-10-20-0006",
+  "created": "2026-10-20T13:46:08+00:00",
+  "domain": "btsup",
+  "request": {
+    "mark_involved": "assigned",
+    "asks_for": [
+      "bug"
+    ],
+    "app": "freshdesk",
+    "owning_team": "other",
+    "requires_recipe_change": true,
+    "requires_deployment": false,
+    "has_bsys_ticket": false,
+    "reproducible": false,
+    "user_confirmed_fix": false,
+    "jira_key": "BTSUP-61972",
+    "note": "Zoom reminders firing Freshdesk ticket emails. Last human comment 2026-05-26, 147 days ago."
+  },
+  "decision": {
+    "disposition": "DECLINE_OUT_OF_SCOPE",
+    "rules_fired": [
+      "BTS-041",
+      "BTS-010",
+      "BTS-002"
+    ],
+    "conflicts": [
+      {
+        "field": "disposition",
+        "winner": "BTS-010",
+        "loser": "BTS-041",
+        "reason": "precedence"
+      },
+      {
+        "field": "disposition",
+        "winner": "BTS-002",
+        "loser": "BTS-010",
+        "reason": "precedence"
+      }
+    ],
+    "escalate": [
+      "BTS-002: Not a BT Support request \u2014 close with the escalation path named.",
+      "confidence 0.30 below 0.5 floor"
+    ],
+    "require": [
+      "user_confirmation",
+      "bsys_ticket_link"
+    ],
+    "confidence": 0.3,
+    "novel": false,
+    "risk_tier": "R3",
+    "risk_rules_fired": [
+      "RSK-005"
+    ],
+    "autonomy": "draft_only",
+    "domain": "btsup",
+    "blocked": true
+  },
+  "verdict": null,
+  "supersedes": null
+}
