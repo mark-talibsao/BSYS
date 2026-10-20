@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 -m lib.triage:*)",
+      "Bash(python3 -m lib.capture:*)",
+      "Bash(python3 -m lib.metrics:*)",
+      "Bash(python3 -m evals.run:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Read(//home/user/BSYS/**)"
+    ]
+  }
+}

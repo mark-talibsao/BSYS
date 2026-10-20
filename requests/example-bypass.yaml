@@ -1,0 +1,41 @@
+# A real-shaped request: sales ops asking for a validation rule to be suppressed
+# so a deal can be pushed through at quarter end.
+request:
+  title: "Suppress the close-date validation for enterprise renewals"
+  source: slack
+  raw: >
+    Hey — can you turn off the validation rule that blocks close dates in the
+    past for enterprise renewals? We have 40 deals that need backdating before
+    Friday and the rule is blocking the reps.
+  requester: { name: "redacted", team: sales_ops, seniority: director }
+  asks_for: [enhancement]
+  asks_to: [suppress_validation, bypass]
+  systems: [salesforce]
+  audience: internal
+  blocked_by: process
+  states_problem: true
+  states_solution: true
+  has_written_requirements: false
+  consequence_of_inaction: "40 renewals cannot be closed in the quarter"
+  deadline_days: 4
+  users_affected: 12
+  revenue_linked: true
+  recurring: false
+  similar_prior_requests: 1
+  production_impact: false
+  encodes_policy: true
+  policy_owner_signed_off: false
+  declarative_option_exists: true
+  declarative_meets_written_requirement: false
+  effort_band: S
+impact:
+  blast_radius: { looked_up: true, recipes: 2, objects: [Opportunity] }
+  records_affected: 40
+  reversible: true
+action:
+  kind: sfdc_validation_rule_change
+  system: salesforce
+  environment: production
+  audience: internal
+  reversible: true
+  records_affected: 40

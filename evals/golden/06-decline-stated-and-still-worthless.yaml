@@ -1,0 +1,46 @@
+# Problem stated, understood, and still not worth doing. This is where DECLINE
+# is actually correct — and where I am historically too soft.
+request:
+  title: "Weekly PDF export of the pipeline board"
+  source: email
+  raw: >
+    Could we get the pipeline board auto-exported to PDF and emailed out every
+    Monday? People open the dashboard anyway, but a PDF would be nice to have
+    in the deck.
+  requester: { name: "redacted", team: sales_ops, seniority: manager }
+  asks_for: [new_report]
+  systems: [salesforce]
+  audience: internal
+  blocked_by: none
+  states_problem: true
+  states_solution: false
+  has_written_requirements: true
+  consequence_of_inaction: none
+  deadline_days: 60
+  users_affected: 30
+  revenue_linked: false
+  recurring: true
+  similar_prior_requests: 0
+  production_impact: false
+  encodes_policy: false
+  declarative_option_exists: false
+  effort_band: M
+impact:
+  blast_radius: { looked_up: true, recipes: 0, objects: [Opportunity] }
+  records_affected: 0
+  reversible: true
+action:
+  kind: scheduled_export
+  system: salesforce
+  environment: production
+  audience: internal
+  reversible: true
+  records_affected: 0
+expect:
+  disposition: DECLINE
+  must_fire: [TRI-023]
+  must_not_fire: [TRI-002, TRI-001]
+  min_confidence: 0.7
+# Why this is golden: P6 in executable form. `require` must still carry
+# alternative_offered — a decline with nothing attached becomes a meeting, and
+# the meeting costs more than the PDF would have.

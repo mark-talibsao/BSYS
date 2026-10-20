@@ -1,0 +1,44 @@
+# Nothing breaks if we do nothing. This is the request type I am worst at
+# declining, which is exactly why it is encoded.
+request:
+  title: "Add a colour-coded health icon to the account page"
+  source: slack
+  raw: "Would be great to have a little red/yellow/green icon on accounts."
+  requester: { name: "redacted", team: customer_success, seniority: manager }
+  asks_for: [enhancement]
+  systems: [salesforce]
+  audience: internal
+  blocked_by: none
+  states_problem: false
+  states_solution: true
+  has_written_requirements: true
+  consequence_of_inaction: inconvenience
+  deadline_days: 90
+  users_affected: 25
+  revenue_linked: false
+  recurring: false
+  similar_prior_requests: 0
+  production_impact: false
+  encodes_policy: false
+  declarative_option_exists: false
+  effort_band: M
+impact:
+  blast_radius: { looked_up: true, recipes: 0, objects: [Account] }
+  records_affected: 0
+  reversible: true
+action:
+  kind: sfdc_field_add
+  system: salesforce
+  environment: production
+  audience: internal
+  reversible: true
+  records_affected: 0
+expect:
+  disposition: CLARIFY
+  must_fire: [TRI-002, TRI-023]
+  min_confidence: 0.7
+# Why this is golden: both rules fire and TRI-002 outranks TRI-023 on purpose.
+# I cannot decline on the merits when no problem has been stated — I do not
+# know the merits yet. Ask first, decline second. The first draft of this case
+# expected DECLINE; the rule set was right and the case was wrong, which is the
+# outcome this suite exists to produce.

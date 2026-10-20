@@ -1,0 +1,32 @@
+# Deliberately outside encoded territory. The system must say so rather than
+# improvise confidently — this case exists to catch overreach, not to be fixed
+# by adding a rule that happens to match it.
+request:
+  title: "Our Marketo instance feels slow"
+  source: slack
+  raw: "Marketo has been sluggish this week, is that us or them?"
+  requester: { name: "redacted", team: marketing, seniority: ic }
+  asks_for: [question]
+  systems: [marketo]
+  audience: internal
+  has_written_requirements: true
+  states_problem: true
+  states_solution: false
+impact:
+  blast_radius: { looked_up: true, recipes: 0, objects: [] }
+  records_affected: 0
+  reversible: true
+action:
+  kind: investigate
+  system: marketo
+  environment: production
+  audience: internal
+  reversible: true
+  records_affected: 0
+expect:
+  risk_tier: R3
+  escalates: true
+  max_confidence: 0.3
+# Why this is golden: `novel` must stay novel. If a future rule set starts
+# firing on this, check that the rule actually encodes judgment rather than
+# pattern-matching the words.

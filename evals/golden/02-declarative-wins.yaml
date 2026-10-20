@@ -1,0 +1,44 @@
+# A tidy request with a native answer. The system should not reach for a recipe.
+request:
+  title: "Require close reason on Closed Lost"
+  source: jira
+  raw: "Reps are closing opps lost without a reason. Can we make it mandatory?"
+  requester: { name: "redacted", team: sales_ops, seniority: manager }
+  asks_for: [enhancement]
+  systems: [salesforce]
+  audience: internal
+  blocked_by: system
+  states_problem: true
+  states_solution: false
+  has_written_requirements: true
+  consequence_of_inaction: "win/loss reporting is unusable; 38% of lost opps have no reason"
+  deadline_days: 30
+  users_affected: 140
+  revenue_linked: false
+  recurring: false
+  similar_prior_requests: 0
+  production_impact: false
+  encodes_policy: false
+  declarative_option_exists: true
+  declarative_meets_written_requirement: true
+  effort_band: XS
+impact:
+  blast_radius: { looked_up: true, recipes: 0, objects: [Opportunity] }
+  records_affected: 0
+  reversible: true
+action:
+  kind: sfdc_validation_rule_change
+  system: salesforce
+  environment: production
+  audience: internal
+  reversible: true
+  records_affected: 0
+expect:
+  disposition: CONFIG
+  mechanism: declarative
+  must_fire: [TRI-020]
+  must_not_fire: [TRI-021, TRI-030]
+  escalates: false
+  min_confidence: 0.8
+# Why this is golden: P2. If a change ever makes this come back BUILD, the rule
+# set has started reaching for the integration fabric by default.

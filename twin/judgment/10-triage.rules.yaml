@@ -1,0 +1,433 @@
+# Domain: request intake & triage
+# Context schema: see twin/playbooks/intake-triage.md §2
+# Dispositions: CLARIFY | DUPLICATE | ROUTE | DECLINE | CONFIG | BUILD | QUEUE
+#
+# Precedence bands:
+#   90  safety / governance — these are allowed to override everything
+#   70  routing — it is not mine
+#   60  hygiene — I cannot decide yet
+#   50  disposition — the actual call (default)
+#   30  sizing, priority, enrichment
+
+meta:
+  domain: triage
+  version: 1
+  updated: 2026-10-20
+
+rules:
+
+# ── A. Hygiene: can I even decide? ──────────────────────────────────────────
+
+- id: TRI-001
+  title: No written requirement, non-trivial ask
+  status: active
+  precedence: 60
+  when:
+    all:
+      - { field: request.has_written_requirements, op: eq, value: false }
+      - { field: request.asks_for, op: any_in, value: [new_integration, new_object, enhancement, new_report] }
+  then:
+    set: { disposition: CLARIFY }
+    require: [problem_statement, current_workaround, who_is_affected, what_breaks_if_we_do_nothing]
+  because: >
+    Verbal scope is scope that changes after I build it. The four questions are
+    not bureaucracy — "what breaks if we do nothing" alone kills roughly a third
+    of requests, and it kills them before I have spent anything.
+  provenance: { source: authored, cases: [] }
+  confidence: 0.9
+  added: 2026-10-20
+
+- id: TRI-002
+  title: Solution handed down as a request
+  status: active
+  precedence: 60
+  when:
+    all:
+      - { field: request.states_solution, op: eq, value: true }
+      - { field: request.states_problem, op: eq, value: false }
+  then:
+    set: { disposition: CLARIFY }
+    require: [problem_statement]
+  because: >
+    "Add a picklist value" is an answer, not a question. Half the time the
+    underlying problem has a cheaper solution than the one I was handed, and the
+    other half I needed the problem statement anyway to know when I am done.
+  provenance: { source: authored, cases: [] }
+  confidence: 0.85
+  added: 2026-10-20
+
+- id: TRI-003
+  title: Known duplicate
+  status: active
+  precedence: 65
+  when:
+    all:
+      - { field: request.duplicate_of, op: exists }
+  then:
+    set: { disposition: DUPLICATE }
+  because: >
+    Merge and point at the original. Two tickets for one problem means two
+    partial answers and a stakeholder who believes neither.
+  provenance: { source: authored, cases: [] }
+  confidence: 0.95
+  added: 2026-10-20
+
+- id: TRI-004
+  title: Blast radius not yet established
+  status: active
+  precedence: 62
+  when:
+    all:
+      - { field: request.asks_for, op: any_in, value: [new_integration, enhancement, data_change, bug_fix] }
+      - { field: impact.blast_radius.looked_up, op: ne, value: true }
+  then:
+    set: { disposition: CLARIFY }
+    require: [dependency_lookup]
+    escalate: "Dependency impact not looked up — P1 forbids deciding on an estimate."
+  because: >
+    Principle P1 in executable form. The lookup takes two minutes and is the
+    single highest-yield step in triage; skipping it is how a "small change"
+    becomes an incident.
+  provenance: { source: authored, cases: [] }
+  confidence: 0.9
+  added: 2026-10-20
+
+# ── B. Routing: it is not mine ──────────────────────────────────────────────
+
+- id: TRI-010
+  title: Access or permission provisioning
+  status: active
+  precedence: 70
+  when:
+    any:
+      - { field: request.asks_for, op: contains, value: access }
+      - { field: request.asks_for, op: contains, value: permission_change }
+  then:
+    set: { disposition: ROUTE, owner: it_security }
+  because: >
+    Security owns the control. If I provision around them once, I become the
+    shadow access path and the audit finds it eventually.
+  provenance: { source: authored, cases: [] }
+  confidence: 0.95
+  added: 2026-10-20
+
+- id: TRI-011
+  title: Pricing, quoting, approval thresholds
+  status: active
+  precedence: 70
+  when:
+    any:
+      - { field: request.topic, op: in, value: [pricing, quoting, discount_approval, cpq] }
+  then:
+    set: { disposition: ROUTE, owner: deal_desk }
+  because: >
+    Deal Desk owns the policy; I own the fields it writes to. Encoding their
+    thresholds into a recipe makes me the approver of record for decisions I am
+    not accountable for.
+  provenance: { source: authored, cases: [] }
+  confidence: 0.9
+  added: 2026-10-20
+
+- id: TRI-012
+  title: Commission and comp logic
+  status: active
+  precedence: 70
+  when:
+    - { field: request.topic, op: in, value: [commission, quota_credit, comp_plan] }
+  then:
+    set: { disposition: ROUTE, owner: sales_comp }
+  because: >
+    Finance owns the model. I own the pipes that feed it — and the distinction
+    matters most in the week someone's paycheck is wrong.
+  provenance: { source: authored, cases: [] }
+  confidence: 0.9
+  added: 2026-10-20
+
+- id: TRI-013
+  title: Net-new product engineering
+  status: active
+  precedence: 70
+  when:
+    all:
+      - { field: request.asks_for, op: contains, value: new_integration }
+      - { field: request.audience, op: eq, value: external_customers }
+  then:
+    set: { disposition: ROUTE, owner: product_engineering }
+    escalate: "Customer-facing surface — Business Apps builds internal, not product."
+  because: >
+    Internal tooling and shipped product have different bars for support,
+    versioning and uptime. Building customer-facing surface on an internal
+    footing is a promise I cannot keep at 2am.
+  provenance: { source: authored, cases: [] }
+  confidence: 0.85
+  added: 2026-10-20
+
+- id: TRI-014
+  title: Campaign strategy or content
+  status: active
+  precedence: 70
+  when:
+    - { field: request.topic, op: in, value: [campaign_strategy, messaging, content] }
+  then:
+    set: { disposition: ROUTE, owner: marketing }
+  because: >
+    I own the plumbing and the attribution data, not the message.
+  provenance: { source: authored, cases: [] }
+  confidence: 0.9
+  added: 2026-10-20
+
+# ── C. Governance: the expensive category ───────────────────────────────────
+
+- id: TRI-030
+  title: Governance question wearing a systems costume
+  status: active
+  precedence: 91
+  when:
+    all:
+      - { field: request.asks_to, op: any_in, value: [bypass, exception, override, suppress_validation] }
+      - { field: request.blocked_by, op: eq, value: process }
+  then:
+    set: { disposition: ROUTE, owner: process_owner }
+    escalate: "Process exception — not a systems change."
+  because: >
+    A request to make the system permit what the process forbids is a request to
+    change the process. Building the bypass silently transfers ownership of that
+    decision to me, and the exception is permanent the moment it ships.
+  provenance: { source: authored, cases: [] }
+  confidence: 0.9
+  added: 2026-10-20
+
+- id: TRI-031
+  title: Policy being buried in plumbing
+  status: active
+  precedence: 90
+  when:
+    all:
+      - { field: request.encodes_policy, op: eq, value: true }
+      - { field: request.policy_owner_signed_off, op: ne, value: true }
+  then:
+    set: { disposition: CLARIFY }
+    require: [named_policy_owner, written_signoff, visible_location_for_the_rule]
+    escalate: "Business policy without a named owner."
+  because: >
+    Principle P3. Policy inside a recipe step is policy nobody can find, review
+    or change without me. If it must be encoded, it lives somewhere visible and
+    somebody signs it.
+  provenance: { source: authored, cases: [] }
+  confidence: 0.85
+  added: 2026-10-20
+
+- id: TRI-032
+  title: Irreversible at scale
+  status: active
+  precedence: 92
+  when:
+    all:
+      - { field: impact.reversible, op: eq, value: false }
+      - { field: impact.records_affected, op: gte, value: 1000 }
+  then:
+    escalate: "Irreversible change above 1k records — human approval required regardless of disposition."
+  because: >
+    Principle P4. The cost of being wrong sets the approval bar, not the cost of
+    the work. Mass updates are cheap to run and expensive to have been wrong
+    about.
+  provenance: { source: authored, cases: [] }
+  confidence: 0.95
+  added: 2026-10-20
+
+# ── D. Disposition: the actual call ─────────────────────────────────────────
+
+- id: TRI-020
+  title: Declarative path exists
+  status: active
+  precedence: 55
+  when:
+    all:
+      - { field: request.declarative_option_exists, op: eq, value: true }
+      - { field: request.declarative_meets_written_requirement, op: eq, value: true }
+  then:
+    set: { disposition: CONFIG, mechanism: declarative }
+  because: >
+    Principle P2. Flow, validation rule or field config beats a recipe I own
+    forever. "We might need more later" is not a written requirement and has
+    never once paid for the complexity it bought.
+  provenance: { source: authored, cases: [] }
+  confidence: 0.9
+  added: 2026-10-20
+
+- id: TRI-021
+  title: Genuine cross-system orchestration
+  status: active
+  precedence: 55
+  when:
+    all:
+      - { field: request.systems, op: gte_len, value: 2 }
+      - { field: request.declarative_option_exists, op: ne, value: true }
+  then:
+    set: { disposition: BUILD, mechanism: workato_recipe }
+  because: >
+    Two or more systems with no native path is exactly what the integration
+    fabric is for. This is the one place a recipe is the cheap answer rather
+    than the expensive one.
+  provenance: { source: authored, cases: [] }
+  confidence: 0.85
+  added: 2026-10-20
+
+- id: TRI-022
+  title: One-off data request masquerading as a build
+  status: active
+  precedence: 58
+  when:
+    all:
+      - { field: request.recurring, op: eq, value: false }
+      - { field: request.asks_for, op: any_in, value: [new_report, data_change] }
+      - { field: request.users_affected, op: lte, value: 3 }
+  then:
+    set: { disposition: CONFIG, mechanism: one_off_query }
+  because: >
+    A question asked once gets an answer, not an asset. Building a report for
+    three people who needed a number this week creates maintenance in exchange
+    for nothing.
+  provenance: { source: authored, cases: [] }
+  confidence: 0.8
+  added: 2026-10-20
+
+- id: TRI-023
+  title: No stated consequence of inaction
+  status: active
+  precedence: 56
+  when:
+    all:
+      - { field: request.consequence_of_inaction, op: in, value: [none, unknown, "", inconvenience] }
+      - { field: request.effort_band, op: in, value: [M, L, XL] }
+  then:
+    set: { disposition: DECLINE }
+    require: [alternative_offered]
+  because: >
+    If nothing breaks when we do nothing, this is a preference competing against
+    work that does break. Decline it in writing, offer the nearest cheap thing,
+    and let it come back with a consequence attached if it is real.
+  provenance: { source: authored, cases: [] }
+  confidence: 0.8
+  added: 2026-10-20
+
+- id: TRI-024
+  title: Production breakage outranks the queue
+  status: active
+  precedence: 80
+  when:
+    any:
+      - { field: request.asks_for, op: contains, value: bug_fix }
+      - { field: request.production_impact, op: eq, value: true }
+  then:
+    set: { disposition: BUILD, priority: P1 }
+  because: >
+    Broken pipes beat new pipes. The queue is a planning artifact; an outage is
+    a fact.
+  provenance: { source: authored, cases: [] }
+  confidence: 0.9
+  added: 2026-10-20
+
+- id: TRI-025
+  title: Third request for the same shape of thing
+  status: active
+  precedence: 57
+  when:
+    - { field: request.similar_prior_requests, op: gte, value: 2 }
+  then:
+    set: { disposition: BUILD, mechanism: generalized }
+    escalate: "Third instance — build the general case, not the third special case."
+  because: >
+    Twice is coincidence, three times is a missing capability. The third
+    one-off costs the same as the general version and leaves me with three
+    things to maintain instead of one.
+  provenance: { source: authored, cases: [] }
+  confidence: 0.85
+  added: 2026-10-20
+
+# ── E. Sizing and priority ──────────────────────────────────────────────────
+
+- id: TRI-040
+  title: Revenue-linked and time-boxed
+  status: active
+  precedence: 30
+  when:
+    all:
+      - { field: request.revenue_linked, op: eq, value: true }
+      - { field: request.deadline_days, op: lte, value: 14 }
+  then:
+    set: { priority: P1 }
+  because: >
+    Quarter-dated revenue work has a real deadline rather than a preferred one.
+    Everything else can be sequenced; this cannot.
+  provenance: { source: authored, cases: [] }
+  confidence: 0.8
+  added: 2026-10-20
+
+- id: TRI-041
+  title: Wide blast radius forces design review
+  status: active
+  precedence: 35
+  when:
+    - { field: impact.blast_radius.recipes, op: gte, value: 5 }
+  then:
+    set: { requires_design_review: true }
+    escalate: "Touches 5+ recipes — design review before build."
+  because: >
+    Past about five dependent recipes, the risk stops being in the change and
+    starts being in what I did not know about the change.
+  provenance: { source: authored, cases: [] }
+  confidence: 0.85
+  added: 2026-10-20
+
+- id: TRI-042
+  title: High-volume object touched
+  status: active
+  precedence: 35
+  when:
+    - { field: impact.records_affected, op: gte, value: 100000 }
+  then:
+    set: { requires_volume_plan: true }
+    escalate: "Six-figure record volume — bulk limits and failure handling are part of the design."
+  because: >
+    Principle P7. A design demoed on ten records and silent about a hundred
+    thousand is not a design yet.
+  provenance: { source: authored, cases: [] }
+  confidence: 0.9
+  added: 2026-10-20
+
+# ── F. Safety net ───────────────────────────────────────────────────────────
+
+- id: TRI-050
+  title: Senior escalation with a thin request
+  status: active
+  precedence: 88
+  when:
+    all:
+      - { field: request.requester.seniority, op: in, value: [vp, svp, cxo] }
+      - { field: request.has_written_requirements, op: eq, value: false }
+  then:
+    escalate: "Executive ask without written scope — I handle this conversation, not the system."
+  because: >
+    Principle P8. The system has no read on why this is being asked now or what
+    happens if the answer is no. Those are exactly the stakes that make an
+    executive request different from the same words from anyone else.
+  provenance: { source: authored, cases: [] }
+  confidence: 0.95
+  added: 2026-10-20
+
+- id: TRI-051
+  title: Unverified platform claim in the reasoning
+  status: active
+  precedence: 88
+  when:
+    - { field: decision.contains_unverified_platform_claim, op: eq, value: true }
+  then:
+    escalate: "Decision rests on an unverified Workato platform claim — verify against docs before it ships."
+  because: >
+    Principle P5 and the organization's standing rule. Memory about connector
+    capability and platform limits is a hypothesis, and a wrong one costs a
+    rebuild.
+  provenance: { source: authored, cases: [] }
+  confidence: 0.95
+  added: 2026-10-20

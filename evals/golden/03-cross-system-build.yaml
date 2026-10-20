@@ -1,0 +1,45 @@
+# Genuine orchestration: two systems, no native path. This is what Workato is for.
+request:
+  title: "Push Gong call outcomes onto the Opportunity timeline"
+  source: slack
+  raw: >
+    We want the key moments from Gong calls to show up on the opp so AEs and
+    managers see them without switching tabs. Spec attached.
+  requester: { name: "redacted", team: revenue_ops, seniority: director }
+  asks_for: [new_integration]
+  systems: [gong, salesforce]
+  audience: internal
+  blocked_by: system
+  states_problem: true
+  states_solution: false
+  has_written_requirements: true
+  consequence_of_inaction: "managers review calls in a separate tool; coaching coverage is ~20%"
+  deadline_days: 45
+  users_affected: 200
+  revenue_linked: true
+  recurring: true
+  similar_prior_requests: 1
+  production_impact: false
+  encodes_policy: false
+  declarative_option_exists: false
+  effort_band: L
+impact:
+  blast_radius: { looked_up: true, recipes: 6, objects: [Opportunity, Task] }
+  records_affected: 250000
+  reversible: true
+action:
+  kind: workato_recipe_build
+  system: workato
+  environment: dev
+  audience: internal
+  reversible: true
+  records_affected: 250000
+expect:
+  disposition: BUILD
+  mechanism: workato_recipe
+  must_fire: [TRI-021, TRI-041, TRI-042]
+  escalates: true
+  min_confidence: 0.7
+# Why this is golden: the happy path must still trip the design-review and
+# volume gates. A BUILD that sails through with six dependent recipes and a
+# quarter-million records is the rule set failing quietly.

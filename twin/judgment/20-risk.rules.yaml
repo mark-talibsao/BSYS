@@ -1,0 +1,149 @@
+# Risk tiering — the autonomy gate.
+#
+# This is the one rule file that binds machine behaviour directly. Everything
+# else shapes a recommendation; this decides whether an action may ever run
+# without me clicking approve.
+#
+# Day one: R0 is the only tier that may execute, and R0 is deliberately almost
+# empty. The list grows by my explicit edit in a reviewed PR. It never grows by
+# inference, by a rule proposal from `reflect`, or because a task would be more
+# convenient if it ran.
+
+meta:
+  domain: risk
+  version: 1
+  updated: 2026-10-20
+  default_tier: R3
+
+tiers:
+  R0:
+    label: Auto-executable
+    rule: Reversible in under a minute, no external party sees it, no record changes.
+    approval: none
+    allowed:
+      - read_any_system
+      - write_to_this_repo
+      - add_internal_jira_label
+      - post_to_my_own_scratch_channel
+  R1:
+    label: Approve once, then batch
+    rule: Reversible, internal-only, bounded record count.
+    approval: single_click
+    examples: [internal_slack_reply, jira_comment, jira_field_update, sfdc_field_update_single_record]
+  R2:
+    label: Approve each, with diff shown
+    rule: Reversible with effort, or visible outside Business Systems.
+    approval: per_action_with_preview
+    examples: [sfdc_bulk_update_under_1k, workato_recipe_edit_in_dev, marketo_list_change, outreach_sequence_change]
+  R3:
+    label: Human does it
+    rule: Irreversible, at scale, external-facing, or touching money.
+    approval: human_performs_action
+    examples:
+      - sfdc_record_merge
+      - sfdc_field_or_object_deletion
+      - sfdc_bulk_update_over_1k
+      - workato_recipe_start_stop_in_prod
+      - workato_connection_reauth
+      - any_outbound_message_to_a_customer
+      - any_change_to_commission_or_quota_data
+      - any_change_to_this_file
+
+rules:
+
+- id: RSK-001
+  title: External communication is never automatic
+  status: active
+  precedence: 99
+  when:
+    - { field: action.audience, op: in, value: [customer, prospect, partner, external] }
+  then:
+    set: { tier: R3 }
+  because: >
+    Organization rule and my own: draft external messages, never send them. An
+    automated message to a customer is an automated promise, and the apology
+    costs more than the time it saved.
+  provenance: { source: authored, cases: [] }
+  confidence: 1.0
+  added: 2026-10-20
+
+- id: RSK-002
+  title: Irreversibility dominates
+  status: active
+  precedence: 98
+  when:
+    - { field: action.reversible, op: eq, value: false }
+  then:
+    set: { tier: R3 }
+  because: >
+    Principle P4. There is no record count small enough to make an irreversible
+    action worth automating on day one, because the failure mode is not "wrong
+    answer", it is "no way back".
+  provenance: { source: authored, cases: [] }
+  confidence: 1.0
+  added: 2026-10-20
+
+- id: RSK-003
+  title: Production automation state is mine
+  status: active
+  precedence: 98
+  when:
+    all:
+      - { field: action.system, op: eq, value: workato }
+      - { field: action.environment, op: eq, value: production }
+      - { field: action.kind, op: in, value: [start_recipe, stop_recipe, edit_recipe, reauth_connection] }
+  then:
+    set: { tier: R3 }
+  because: >
+    Stopping the wrong prod recipe is silent — nothing errors, data just quietly
+    stops moving, and we find out from a stakeholder days later. That failure
+    mode is uniquely bad for automation to own.
+  provenance: { source: authored, cases: [] }
+  confidence: 1.0
+  added: 2026-10-20
+
+- id: RSK-004
+  title: Volume escalates tier
+  status: active
+  precedence: 90
+  when:
+    - { field: action.records_affected, op: gte, value: 1000 }
+  then:
+    set: { tier: R3 }
+  because: >
+    Above a thousand records a mistake stops being a correction and starts
+    being an incident with a comms plan.
+  provenance: { source: authored, cases: [] }
+  confidence: 0.95
+  added: 2026-10-20
+
+- id: RSK-005
+  title: Low confidence cannot buy autonomy
+  status: active
+  precedence: 95
+  when:
+    - { field: decision.confidence, op: lt, value: 0.7 }
+  then:
+    set: { tier: R3 }
+  because: >
+    A tier is a statement about the action's blast radius; confidence is a
+    statement about whether I understood the request. Both have to hold, and the
+    weaker one governs.
+  provenance: { source: authored, cases: [] }
+  confidence: 1.0
+  added: 2026-10-20
+
+- id: RSK-006
+  title: Unencoded domain is never autonomous
+  status: active
+  precedence: 95
+  when:
+    - { field: decision.novel, op: eq, value: true }
+  then:
+    set: { tier: R3 }
+  because: >
+    If no rule fired, the system is improvising. Improvisation is welcome in the
+    reasoning and forbidden in the side effects.
+  provenance: { source: authored, cases: [] }
+  confidence: 1.0
+  added: 2026-10-20
